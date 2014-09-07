@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require_relative 'bash_colors'
+
 class PreCommitHandler
 
   attr_accessor :file_errors
@@ -63,7 +65,7 @@ class PreCommitHandler
       file_types[extension.to_sym][:breakpoints].each do |breakpoint|
         text = %x{git show :#{file}}
         if text.scan(/#{breakpoint}/).count > 0
-          errors << "File ./#{file} contains #{breakpoint}" 
+          errors << "File #{Bash::Text.red do "./#{file}" end } contains #{breakpoint}" 
         end
       end
       errors.count > 0

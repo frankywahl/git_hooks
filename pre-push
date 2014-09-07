@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require_relative 'bash_colors'
+
 # Read this blog to know more about this script.
 #
 # http://blog.bigbinary.com/2013/09/19/do-not-allow-force-pusht-to-master.html
@@ -26,7 +28,7 @@ class PrePushHandler
   end
 
   def reject
-    messages = ["Your attempt to FORCE PUSH to MASTER has been rejected."]
+    messages = ["Your attempt to #{Bash::Text.red{ "FORCE PUSH to MASTER" }} has been rejected."]
     messages << "If you still want to FORCE PUSH then you need to ignore the pre_push git hook by executing following command."
     messages << "git push master --force --no-verify"
     feedback messages
