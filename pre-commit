@@ -61,8 +61,9 @@ class PreCommitHandler
     def contains_breakpoints?
       return false if skip_file? 
       file_types[extension.to_sym][:breakpoints].each do |breakpoint|
-        if open(file).grep(/#{breakpoint}/).count > 0
-          errors << "File #{file} contains #{breakpoint}" 
+        text = %x{git show :#{file}}
+        if text.scan(/#{breakpoint}/).count > 0
+          errors << "File ./#{file} contains #{breakpoint}" 
         end
       end
       errors.count > 0
