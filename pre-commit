@@ -9,15 +9,15 @@ class PreCommitHandler
   end
 
   def handle
-    reject if code_contains_bindings?
+    reject if code_contains_breakpoints?
   end
 
   private 
 
-  def code_contains_bindings? 
+  def code_contains_breakpoints? 
     commiting_files.each do |file|
       analyzer = FileAnalyzer.new(file)
-      if analyzer.contains_binding?(file)
+      if analyzer.contains_breakpoints?
         file_errors << analyzer.errors
       end
     end
@@ -58,11 +58,11 @@ class PreCommitHandler
       @errors = []
     end
 
-    def contains_binding?(file) 
+    def contains_breakpoints?
       return false if skip_file? 
-      file_types[extension.to_sym][:binding].each do |binding|
-        if open(file).grep(/#{binding}/).count > 0
-          errors << "File #{file} contains #{binding}" 
+      file_types[extension.to_sym][:breakpoints].each do |breakpoint|
+        if open(file).grep(/#{breakpoint}/).count > 0
+          errors << "File #{file} contains #{breakpoint}" 
         end
       end
       errors.count > 0
@@ -71,15 +71,15 @@ class PreCommitHandler
     def file_types
       {
         rb: {
-          binding: ["binding.pry", "debugger"],
+          breakpoints: ["binding.pry", "debugger"],
           comment: ["#"]
         },
         js: {
-          binding: ["debugger"],
+          breakpoints: ["debugger"],
           comment: "//"
         },
         coffee: {
-          binding: ["debugger"],
+          breakpoints: ["debugger"],
           comment: "#"
         }
       }
