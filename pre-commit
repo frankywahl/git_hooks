@@ -16,8 +16,9 @@ class PreCommitHandler
 
   def code_contains_bindings? 
     commiting_files.each do |file|
-      if FileAnalyzer.contains_binding?(file)
-        file_errors << "File #{file} contains #{FileAnalyzer.file_types[file.split(".").last.to_sym][:binding].join(" or ")}"
+      analyzer = FileAnalyzer.new(file)
+      if analyzer.contains_binding?(file)
+        file_errors << analyzer.errors
       end
     end
     file_errors.count > 0
@@ -48,18 +49,26 @@ class PreCommitHandler
   end
 
   class FileAnalyzer
-    def self.contains_binding?(file) 
-      return false unless File.file? file
-      extension = file.split(".").last
-      return false if extension.nil? || !(file_types.keys.include? extension.to_sym)
+    attr_reader :file, :extension
+    attr_accessor :errors
 
-      file_types[extension.to_sym][:binding].each do |binding|
-        return true if open(file).grep(/#{binding}/).count > 0
-      end
-      false
+    def initialize(file)
+      @file = file
+      @extension = file.split(".").last
+      @errors = []
     end
 
-    def self.file_types
+    def contains_binding?(file) 
+      return false if skip_file? 
+      file_types[extension.to_sym][:binding].each do |binding|
+        if open(file).grep(/#{binding}/).count > 0
+          errors << "File #{file} contains #{binding}" 
+        end
+      end
+      errors.count > 0
+    end
+
+    def file_types
       {
         rb: {
           binding: ["binding.pry", "debugger"],
@@ -74,6 +83,10 @@ class PreCommitHandler
           comment: "#"
         }
       }
+    end
+
+    def skip_file? 
+      extension.nil? || !(file_types.keys.include? extension.to_sym) || !(File.file? file)
     end
   end
 end
