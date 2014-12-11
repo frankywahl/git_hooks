@@ -1,6 +1,16 @@
 #!/usr/bin/env ruby
 
-require_relative 'bash_colors'
+require_relative '../bash_colors'
+
+require 'optparse'
+
+OptionParser.new do |opts|
+  opts.on("--about") do
+    puts "Makes sure code does not contain any breaking point"
+  end
+end.parse!
+
+
 
 class PreCommitHandler
 
@@ -14,9 +24,9 @@ class PreCommitHandler
     reject if code_contains_breakpoints?
   end
 
-  private 
+  private
 
-  def code_contains_breakpoints? 
+  def code_contains_breakpoints?
     commiting_files.each do |file|
       analyzer = FileAnalyzer.new(file)
       if analyzer.contains_breakpoints?
@@ -61,11 +71,11 @@ class PreCommitHandler
     end
 
     def contains_breakpoints?
-      return false if skip_file? 
+      return false if skip_file?
       file_types[extension.to_sym][:breakpoints].each do |breakpoint|
         text = %x{git show :#{file}}
         if text.scan(/#{breakpoint}/).count > 0
-          errors << "File #{Bash::Text.red do "./#{file}" end } contains #{breakpoint}" 
+          errors << "File #{Bash::Text.red do "./#{file}" end } contains #{breakpoint}"
         end
       end
       errors.count > 0
@@ -88,7 +98,7 @@ class PreCommitHandler
       }
     end
 
-    def skip_file? 
+    def skip_file?
       extension.nil? || !(file_types.keys.include? extension.to_sym) || !(File.file? file)
     end
   end
