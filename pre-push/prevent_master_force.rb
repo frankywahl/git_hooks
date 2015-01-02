@@ -23,11 +23,12 @@ class PrePushHandler
   private
 
   def pushing_to_master?
-    current_branch == 'master'
+    return true if push_cmd.match(/master /)
+    current_branch == 'master' && !indicating_different_branch?
   end
 
   def current_branch
-    result = %x{git branch}.split("\n")
+    result = `git branch`.split("\n")
     if result.empty?
       feedback "It seems your app is not a git repository."
     else
@@ -43,20 +44,33 @@ class PrePushHandler
   end
 
   def forced_push?
-    cmd = `ps -ocommand`.strip
-    push_cmd = cmd.scan(/^git push .*master.*/)
-    !push_cmd.empty? && push_cmd.first.match(/--force|-f/)
+    push_cmd.match(/--force|-f/)
   end
 
-  def feedback messages
-    puts "*"*40
-    [messages].flatten.each do |message|
-      puts message
-    end
-    puts "*"*40
-
+  def feedback(messages)
+    stars = "*"*40
+    puts [stars, messages, stars].flatten.join("\n")
     exit 1
   end
+
+  def push_cmd
+    @push_cmd ||= begin
+      cmd = `ps -ocommand`.strip
+      cmd.scan(/^git push.*/).first.to_s
+    end
+  end
+
+  def options_count_to_low?
+    push_cmd.split(" ").reject{|x| x.match(/-/) }.count < 3
+  end
+
+  def indicating_different_branch?
+    return false if options_count_to_low?
+    if string = push_cmd.scan(/(master):(\w+)/).flatten
+      string[1] != 'master'
+    end
+  end
+
 end
 
 PrePushHandler.new.handle

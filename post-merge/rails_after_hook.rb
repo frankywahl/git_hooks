@@ -46,4 +46,3 @@ class PostMergeHandler
 end
 
 PostMergeHandler.new.handle
-

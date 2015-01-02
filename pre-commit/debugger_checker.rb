@@ -37,7 +37,7 @@ class PreCommitHandler
   end
 
   def commiting_files
-    %x{git diff --name-only --cached}.split("\n")
+    `git diff --name-only --cached`.chomp.split("\n")
   end
 
   def reject
@@ -51,12 +51,8 @@ class PreCommitHandler
   end
 
   def feedback(messages)
-    puts "*"*40
-    [messages].flatten.each do |message|
-      puts message
-    end
-    puts "*"*40
-
+    stars = "*"*40
+    puts [stars, messages, stars].flatten.join("\n")
     exit 1
   end
 
@@ -72,8 +68,8 @@ class PreCommitHandler
 
     def contains_breakpoints?
       return false if skip_file?
+      text = `git show :#{file}`
       file_types[extension.to_sym][:breakpoints].each do |breakpoint|
-        text = %x{git show :#{file}}
         if text.scan(/#{breakpoint}/).count > 0
           errors << "File #{Bash::Text.red do "./#{file}" end } contains #{breakpoint}"
         end
