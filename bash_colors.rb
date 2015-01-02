@@ -17,21 +17,47 @@
 
 class Bash
 
+  COLOR_CODES = {
+    default_text:  39,
+    black:         30,
+    red:           31,
+    green:         32,
+    yellow:        33,
+    blue:          34,
+    magenta:       35,
+    cyan:          36,
+    light_gray:    37,
+    dark_gray:     90,
+    light_red:     91,
+    light_green:   92,
+    light_yellow:  93,
+    light_blue:    94,
+    light_magenta: 95,
+    light_cyan:    96,
+    white:         97,
+  }
+
+  DEFAULTS = {
+    text: 39,
+    background: 49,
+    formatting: 0
+  }
+
+  FORMAT_CODES = {
+    bold: 1,
+    dim: 2,
+    underline: 4,
+    blink: 5,
+    reverse: 7,
+    hidden: 8
+  }
+
+
   class Text
     class << self
-      def default
-        "\033[39m"
-      end
-
-      %w(black red green yellow blue magenta cyan light_gray).each_with_index do |color, value|
-        define_method("#{color}") do |*args, &block|
-          "\033[#{30 + value}m#{block.call}#{default}"
-        end
-      end
-
-      %w(dark_gray light_red light_green light_yellow light_blue light_magenta light_cyan white).each_with_index do |color, value|
-        define_method("#{color}") do |*args, &block|
-          "\033[#{90 + value}m#{block.call}#{default}"
+      COLOR_CODES.each do |color_name, value|
+        define_method("#{color_name.to_s}") do |*args, &block|
+          "\033[#{value}m#{block.call}\033[#{DEFAULTS[:text]}m"
         end
       end
     end
@@ -39,19 +65,9 @@ class Bash
 
   class Background
     class << self
-      def default
-        "\033[49m"
-      end
-
-      %w(black red green yellow blue magenta cyan light_gray).each_with_index do |color, value|
-        define_method("#{color}") do |*args, &block|
-          "\033[#{40 + value}m#{block.call}#{default}"
-        end
-      end
-
-      %w(dark_gray light_red light_green light_yellow light_blue light_magenta light_cyan white).each_with_index do |color, value|
-        define_method("#{color}") do |*args, &block|
-          "\033[#{100 + value}m#{block.call}#{default}"
+      COLOR_CODES.each do |color_name, value|
+        define_method("#{color_name.to_s}") do |*args, &block|
+          "\033[#{value + 10}m#{block.call}\033[#{DEFAULTS[:background]}m"
         end
       end
     end
@@ -59,15 +75,12 @@ class Bash
 
   class Formatting
     class << self
-      def default
-        "\033[0m"
-      end
-      %w(bold dim underline blink reverse hidden).each_with_index do |color, value|
-        define_method("#{color}") do |*args, &block|
-          "\033[#{1 + value}m#{block.call}\033[#{21 + value}m"
+      FORMAT_CODES.each do |format_name, value|
+        define_method("#{format_name.to_s}") do |*args, &block|
+          "\033[#{value}m#{block.call}\033[#{value + 20}m"
         end
       end
-
     end
   end
+
 end
