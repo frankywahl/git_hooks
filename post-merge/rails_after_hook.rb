@@ -36,6 +36,7 @@ class PostMergeHandler
   end
 
   def run_bundle
+    puts "Running migrations..."
     system("bundle install", out: $stdout, err: :out)
   end
 
