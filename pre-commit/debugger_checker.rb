@@ -87,6 +87,10 @@ class PreCommitHandler
           breakpoints: ["debugger"],
           comment: "//"
         },
+        es6: {
+          breakpoints: ["debugger"],
+          comment: "//"
+        },
         coffee: {
           breakpoints: ["debugger"],
           comment: "#"
