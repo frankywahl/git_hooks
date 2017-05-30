@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require_relative '../bash_colors'
+require_relative "../bash_colors"
 
-require 'optparse'
+require "optparse"
 
 OptionParser.new do |opts|
   opts.on("--about") do
@@ -10,10 +10,7 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-
-
 class PreCommitHandler
-
   attr_accessor :file_errors
 
   def initialize
@@ -29,9 +26,7 @@ class PreCommitHandler
   def code_contains_breakpoints?
     commiting_files.each do |file|
       analyzer = FileAnalyzer.new(file)
-      if analyzer.contains_breakpoints?
-        file_errors << analyzer.errors
-      end
+      file_errors << analyzer.errors if analyzer.contains_breakpoints?
     end
     file_errors.count > 0
   end
@@ -41,7 +36,7 @@ class PreCommitHandler
   end
 
   def reject
-    messages = ["Your attempt to COMMIT was rejected" ]
+    messages = ["Your attempt to COMMIT was rejected"]
     messages << nil
     messages << file_errors
     messages << nil
@@ -51,7 +46,7 @@ class PreCommitHandler
   end
 
   def feedback(messages)
-    stars = "*"*40
+    stars = "*" * 40
     puts [stars, messages, stars].flatten.join("\n")
     exit 1
   end
@@ -71,7 +66,7 @@ class PreCommitHandler
       text = `git show :#{file}`
       file_types[extension.to_sym][:breakpoints].each do |breakpoint|
         if text.scan(/#{breakpoint}/).count > 0
-          errors << "File #{Bash::Text.red do "./#{file}" end } contains #{breakpoint}"
+          errors << "File #{Bash::Text.red { "./#{file}" }} contains #{breakpoint}"
         end
       end
       errors.count > 0

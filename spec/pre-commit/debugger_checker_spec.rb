@@ -1,7 +1,7 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe PreCommitHandler do
-  let(:handler) { self.described_class.new }
+  let(:handler) { described_class.new }
 
   before :each do
     allow(File).to receive(:file?).with(anything).and_return(true)
@@ -19,18 +19,17 @@ describe PreCommitHandler do
 
       it "will not fail" do
         expect(STDOUT).to receive(:puts).never
-        expect {handler.handle}.not_to raise_error
+        expect { handler.handle }.not_to raise_error
       end
     end
 
     describe "with binding.pry" do
-
       before :each do
         allow_any_instance_of(Object).to receive(:`).with("git show :file.rb").and_return("dsafa binding.pry")
       end
 
       it "will fail" do
-        message=<<-EOF.strip_heredoc
+        message = <<-EOF.strip_heredoc
         ****************************************
         Your attempt to COMMIT was rejected
 
@@ -42,7 +41,7 @@ describe PreCommitHandler do
         EOF
         allow(File).to receive(:file?).with(anything).and_return(true)
         expect(STDOUT).to receive(:puts).with(message.chomp)
-        expect {handler.handle}.to raise_error SystemExit
+        expect { handler.handle }.to raise_error SystemExit
       end
     end
     describe "with debugger" do
@@ -51,7 +50,7 @@ describe PreCommitHandler do
       end
 
       it "will fail" do
-        message=<<-EOF.strip_heredoc
+        message = <<-EOF.strip_heredoc
         ****************************************
         Your attempt to COMMIT was rejected
 
@@ -63,11 +62,9 @@ describe PreCommitHandler do
         EOF
         allow(File).to receive(:file?).with(anything).and_return(true)
         expect(STDOUT).to receive(:puts).with(message.chomp)
-        expect {handler.handle}.to raise_error SystemExit
+        expect { handler.handle }.to raise_error SystemExit
       end
     end
-
-
   end
 
   describe "javascript files" do
@@ -82,7 +79,7 @@ describe PreCommitHandler do
 
       it "will not fail" do
         expect(STDOUT).to receive(:puts).never
-        expect {handler.handle}.not_to raise_error
+        expect { handler.handle }.not_to raise_error
       end
     end
 
@@ -92,7 +89,7 @@ describe PreCommitHandler do
       end
 
       it "will fail" do
-        message=<<-EOF.strip_heredoc
+        message = <<-EOF.strip_heredoc
         ****************************************
         Your attempt to COMMIT was rejected
 
@@ -104,11 +101,9 @@ describe PreCommitHandler do
         EOF
         allow(File).to receive(:file?).with(anything).and_return(true)
         expect(STDOUT).to receive(:puts).with(message.chomp)
-        expect {handler.handle}.to raise_error SystemExit
+        expect { handler.handle }.to raise_error SystemExit
       end
     end
-
-
   end
 
   describe "es6 javascript files" do
@@ -123,7 +118,7 @@ describe PreCommitHandler do
 
       it "will not fail" do
         expect(STDOUT).to receive(:puts).never
-        expect {handler.handle}.not_to raise_error
+        expect { handler.handle }.not_to raise_error
       end
     end
 
@@ -133,7 +128,7 @@ describe PreCommitHandler do
       end
 
       it "will fail" do
-        message=<<-EOF.strip_heredoc
+        message = <<-EOF.strip_heredoc
         ****************************************
         Your attempt to COMMIT was rejected
 
@@ -145,7 +140,7 @@ describe PreCommitHandler do
         EOF
         allow(File).to receive(:file?).with(anything).and_return(true)
         expect(STDOUT).to receive(:puts).with(message.chomp)
-        expect {handler.handle}.to raise_error SystemExit
+        expect { handler.handle }.to raise_error SystemExit
       end
     end
   end
@@ -162,7 +157,7 @@ describe PreCommitHandler do
 
       it "will not fail" do
         expect(STDOUT).to receive(:puts).never
-        expect {handler.handle}.not_to raise_error
+        expect { handler.handle }.not_to raise_error
       end
     end
 
@@ -172,7 +167,7 @@ describe PreCommitHandler do
       end
 
       it "will fail" do
-        message=<<-EOF.strip_heredoc
+        message = <<-EOF.strip_heredoc
         ****************************************
         Your attempt to COMMIT was rejected
 
@@ -184,11 +179,8 @@ describe PreCommitHandler do
         EOF
         allow(File).to receive(:file?).with(anything).and_return(true)
         expect(STDOUT).to receive(:puts).with(message.chomp)
-        expect {handler.handle}.to raise_error SystemExit
+        expect { handler.handle }.to raise_error SystemExit
       end
     end
-
-
   end
-
 end

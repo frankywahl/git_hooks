@@ -1,15 +1,14 @@
-require 'spec_helper'
+require "spec_helper"
 
-require_relative '../../post-merge/rails_after_hook'
+require_relative "../../post-merge/rails_after_hook"
 
 describe PostMergeHandler do
-
-  let(:handler) { self.described_class.new }
+  let(:handler) { described_class.new }
 
   describe "#initialize" do
     it "initializes properly" do
       allow_any_instance_of(Object).to receive(:`).with("git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD").and_return("Foo\nBar")
-      expect(handler.files_changed).to match_array(%w(Foo Bar))
+      expect(handler.files_changed).to match_array(%w[Foo Bar])
     end
   end
 

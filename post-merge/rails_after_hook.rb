@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require_relative '../bash_colors'
+require_relative "../bash_colors"
 
-require 'optparse'
+require "optparse"
 
 OptionParser.new do |opts|
   opts.on("--about") do
@@ -43,7 +43,6 @@ class PostMergeHandler
   def run_rake
     system("bundle exec rake db:migrate db:seed", out: $stdout, err: :out)
   end
-
 end
 
 PostMergeHandler.new.handle

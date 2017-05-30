@@ -14,9 +14,7 @@
 #   puts "Hello, this is #{Bash::Text.red { Bash::Background.green { "red with a green background" } } }"
 #       => Hello, this is red with a green background
 #
-
 class Bash
-
   COLOR_CODES = {
     default_text:  39,
     black:         30,
@@ -34,14 +32,14 @@ class Bash
     light_blue:    94,
     light_magenta: 95,
     light_cyan:    96,
-    white:         97,
-  }
+    white:         97
+  }.freeze
 
   DEFAULTS = {
     text: 39,
     background: 49,
     formatting: 0
-  }
+  }.freeze
 
   FORMAT_CODES = {
     bold: 1,
@@ -50,37 +48,38 @@ class Bash
     blink: 5,
     reverse: 7,
     hidden: 8
-  }
+  }.freeze
 
-
+  # Wrapper for manipulating the text
   class Text
     class << self
       COLOR_CODES.each do |color_name, value|
-        define_method("#{color_name.to_s}") do |*args, &block|
+        define_method(color_name.to_s) do |*_args, &block|
           "\033[#{value}m#{block.call}\033[#{DEFAULTS[:text]}m"
         end
       end
     end
   end
 
+  # Wrapper for manipulating the background
   class Background
     class << self
       COLOR_CODES.each do |color_name, value|
-        define_method("#{color_name.to_s}") do |*args, &block|
+        define_method(color_name.to_s) do |*_args, &block|
           "\033[#{value + 10}m#{block.call}\033[#{DEFAULTS[:background]}m"
         end
       end
     end
   end
 
+  # Wrapper for manipulating the format
   class Formatting
     class << self
       FORMAT_CODES.each do |format_name, value|
-        define_method("#{format_name.to_s}") do |*args, &block|
+        define_method(format_name.to_s) do |*_args, &block|
           "\033[#{value}m#{block.call}\033[#{value + 20}m"
         end
       end
     end
   end
-
 end
