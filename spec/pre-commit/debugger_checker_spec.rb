@@ -4,6 +4,7 @@ describe PreCommitHandler do
   let(:handler) { described_class.new }
 
   before :each do
+    described_class::FileType.register(extension: :rb, breakpoints: ["binding.pry", "debugger"])
     allow(File).to receive(:file?).with(anything).and_return(true)
   end
 

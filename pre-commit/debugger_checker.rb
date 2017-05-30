@@ -64,7 +64,7 @@ class PreCommitHandler
     def contains_breakpoints?
       return false if skip_file?
       text = `git show :#{file}`
-      file_types[extension.to_sym][:breakpoints].each do |breakpoint|
+      file_type.breakpoints.each do |breakpoint|
         if text.scan(/#{breakpoint}/).count > 0
           errors << "File #{Bash::Text.red { "./#{file}" }} contains #{breakpoint}"
         end
@@ -72,31 +72,32 @@ class PreCommitHandler
       errors.count > 0
     end
 
-    def file_types
-      {
-        rb: {
-          breakpoints: ["binding.pry", "debugger"],
-          comment: ["#"]
-        },
-        js: {
-          breakpoints: ["debugger"],
-          comment: "//"
-        },
-        es6: {
-          breakpoints: ["debugger"],
-          comment: "//"
-        },
-        coffee: {
-          breakpoints: ["debugger"],
-          comment: "#"
-        }
-      }
+    private
+
+    def file_type
+      @file_type ||= FileType.for(extension)
     end
 
     def skip_file?
-      extension.nil? || !(file_types.keys.include? extension.to_sym) || !(File.file? file)
+      extension.nil? || file_type.nil? || !(File.file? file)
+    end
+  end
+
+  class FileType
+    DATASTORE = {}
+    def self.register(extension:, breakpoints:)
+      DATASTORE[extension] = FileType.new(extension: extension, breakpoints: breakpoints)
+    end
+
+    def self.for(extension)
+      DATASTORE[extension]
+    end
+
+    def initialize(extension:, breakpoints:)
+      @extension = extension
+      @breakpoints = breakpoints
     end
   end
 end
-
+PreCommitHandler::FileType.register(extension: :rb, breakpoints: ["binding.pry", "debugger"])
 PreCommitHandler.new.handle
