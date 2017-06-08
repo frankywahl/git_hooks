@@ -25,7 +25,7 @@ class PostMergeHandler
   private
 
   def gemfile_changed?
-    files_changed.include? "Gemfile"
+    files_changed.include? "Gemfile.lock"
   end
 
   def pending_migrations?
@@ -36,11 +36,12 @@ class PostMergeHandler
   end
 
   def run_bundle
-    puts "Running migrations..."
+    puts "Running bundle..."
     system("bundle install", out: $stdout, err: :out)
   end
 
   def run_rake
+    puts "Running migrations..."
     system("bundle exec rake db:migrate db:seed", out: $stdout, err: :out)
   end
 end
