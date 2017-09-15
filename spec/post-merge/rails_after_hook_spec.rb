@@ -2,7 +2,7 @@ require "spec_helper"
 
 require_relative "../../post-merge/rails_after_hook"
 
-describe PostMergeHandler do
+describe PostMergeHandler::Ruby do
   let(:handler) { described_class.new }
 
   describe "#initialize" do
