@@ -14,7 +14,7 @@ describe PostMergeHandler do
 
   describe "bundle install" do
     it "is ran when Gemfile is changed" do
-      allow_any_instance_of(Object).to receive(:`).with("git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD").and_return("Gemfile\nBar")
+      allow_any_instance_of(Object).to receive(:`).with("git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD").and_return("Gemfile.lock\nBar")
       expect(handler).to receive(:system).with("bundle install", out: $stdout, err: :out)
       handler.handle
     end
