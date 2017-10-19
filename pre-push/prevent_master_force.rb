@@ -11,6 +11,7 @@ require "optparse"
 OptionParser.new do |opts|
   opts.on("--about") do
     puts "Prevents force pushing to master"
+    exit
   end
 end.parse!
 

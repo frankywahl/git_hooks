@@ -7,6 +7,7 @@ require "optparse"
 OptionParser.new do |opts|
   opts.on("--about") do
     puts "Makes sure code does not contain any breaking point"
+    exit
   end
 end.parse!
 
