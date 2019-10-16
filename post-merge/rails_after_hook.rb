@@ -43,7 +43,7 @@ module PostMergeHandler
 
     def run_rake
       puts "Running migrations..."
-      system("bundle exec rake db:migrate db:seed", out: $stdout, err: :out)
+      system("bundle exec rake db:migrate db:seed db:test:prepare", out: $stdout, err: :out)
     end
   end
 end
