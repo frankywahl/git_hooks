@@ -20,6 +20,7 @@ module PostMergeHandler
 
     def handle
       run_yarn if yarn_changed?
+      run_npm if npm_changed?
     end
 
     private
@@ -31,6 +32,15 @@ module PostMergeHandler
     def run_yarn
       puts "Running yarn..."
       system("yarn install --pure-lockfile", out: $stdout, err: :out)
+    end
+
+    def npm_changed?
+      files_changed.include? "package-lock.json"
+    end
+
+    def run_npm
+      puts "Running npm..."
+      system("npm install", out: $stdout, err: :out)
     end
   end
 end
