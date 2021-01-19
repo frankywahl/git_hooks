@@ -15,9 +15,9 @@ import (
 )
 
 const tmplate string = `***********************************************************
-Your attempt to {{ print_error "FORCE PUSH to MASTER" }} has been rejected
+Your attempt to {{ print_error "FORCE PUSH" }} has been rejected
 If you still want to FORCE PUSH then you need to ignore the pre_push git hook by executing following command.
-git push master --force --no-verify
+git push {{ .BranchName }} --force --no-verify
 ***********************************************************
 `
 
@@ -27,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	if about {
-		fmt.Println("Prevents force pushing to master")
+		fmt.Println("Prevents force pushing to master or main")
 		return
 	}
 
@@ -42,7 +42,7 @@ func run() error {
 		return fmt.Errorf("could not get the pushCmd: %w", err)
 	}
 
-	if isPushingToMaster(cmd) && isForcedPushed(cmd) {
+	if (isPushingTo("master", cmd) || isPushingTo("main", cmd)) && isForcedPushed(cmd) {
 		tmpl, err := template.New("anything").Funcs(
 			template.FuncMap{
 				"print_error": func(i interface{}) (string, error) {
@@ -53,11 +53,19 @@ func run() error {
 		if err != nil {
 			return fmt.Errorf("could not create temaplte: %w", err)
 		}
-		if err := tmpl.Execute(os.Stdout, struct{}{}); err != nil {
+		branchName, err := currentBranchName()
+		if err != nil {
+			panic(err)
+		}
+		if err := tmpl.Execute(os.Stdout, struct {
+			BranchName string
+		}{
+			BranchName: branchName,
+		}); err != nil {
 			return fmt.Errorf("could not execute template: %w", err)
 		}
 
-		return fmt.Errorf("force pushing to master is disabled")
+		return fmt.Errorf("force pushing to %s is disabled", branchName)
 	}
 	return nil
 }
@@ -66,24 +74,24 @@ func isForcedPushed(cmd string) bool {
 	return strings.Contains(cmd, "--force") || strings.Contains(cmd, " -f")
 }
 
-func isPushingToMaster(cmd string) bool {
-	if strings.Contains(cmd, "master ") {
+func isPushingTo(branchName string, cmd string) bool {
+	if strings.Contains(cmd, branchName+" ") {
 		return true
 	}
 
-	if isIndicatingDifferentBranch(cmd) {
+	if isIndicatingDifferentBranch(branchName, cmd) {
 		return false
 	}
 
-	master, err := isCurrentMaster()
+	currentBranch, err := currentBranchName()
 	if err != nil {
 		return false
 	}
 
-	return master
+	return currentBranch == branchName
 }
 
-func isIndicatingDifferentBranch(cmd string) bool {
+func isIndicatingDifferentBranch(branchName, cmd string) bool {
 	args := strings.Split(cmd, " ")
 
 	cmdOptions := []string{}
@@ -104,12 +112,7 @@ func isIndicatingDifferentBranch(cmd string) bool {
 	if !ok {
 		return true
 	}
-
-	if k != "master" {
-		return true
-	}
-
-	return false
+	return k != branchName
 }
 
 func getMatches(r *regexp.Regexp, str string) map[string]string {
@@ -142,10 +145,11 @@ func pushCmd() (string, error) {
 	return "", nil
 }
 
-func isCurrentMaster() (bool, error) {
+func currentBranchName() (string, error) {
+
 	output, err := git_hooks.Git("rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
-		return false, fmt.Errorf("could not get current branch: %w", err)
+		return "", fmt.Errorf("could not get branch: %w", err)
 	}
-	return "master" == output, nil
+	return output, nil
 }
