@@ -15,9 +15,11 @@ import (
 )
 
 const tmplate string = `***********************************************************
-Your attempt to {{ print_error "FORCE PUSH to MASTER" }} has been rejected
+Your attempt to {{ print_error "FORCE PUSH to MASTER - MAIN" }} has been rejected
 If you still want to FORCE PUSH then you need to ignore the pre_push git hook by executing following command.
 git push master --force --no-verify
+git push main --force --no-verify
+
 ***********************************************************
 `
 
@@ -27,7 +29,7 @@ func main() {
 	flag.Parse()
 
 	if about {
-		fmt.Println("Prevents force pushing to master")
+		fmt.Println("Prevents force pushing to master or main")
 		return
 	}
 
@@ -42,7 +44,7 @@ func run() error {
 		return fmt.Errorf("could not get the pushCmd: %w", err)
 	}
 
-	if isPushingToMaster(cmd) && isForcedPushed(cmd) {
+	if (isPushingToMaster(cmd) || isPushingToMain(cmd)) && isForcedPushed(cmd) {
 		tmpl, err := template.New("anything").Funcs(
 			template.FuncMap{
 				"print_error": func(i interface{}) (string, error) {
@@ -83,6 +85,23 @@ func isPushingToMaster(cmd string) bool {
 	return master
 }
 
+func isPushingToMain(cmd string) bool {
+	if strings.Contains(cmd, "main ") {
+		return true
+	}
+
+	if isIndicatingDifferentBranch(cmd) {
+		return false
+	}
+
+	main, err := isCurrentMain()
+	if err != nil {
+		return false
+	}
+
+	return main
+}
+
 func isIndicatingDifferentBranch(cmd string) bool {
 	args := strings.Split(cmd, " ")
 
@@ -105,7 +124,7 @@ func isIndicatingDifferentBranch(cmd string) bool {
 		return true
 	}
 
-	if k != "master" {
+	if k != "master" && k != "main" {
 		return true
 	}
 
@@ -148,4 +167,12 @@ func isCurrentMaster() (bool, error) {
 		return false, fmt.Errorf("could not get current branch: %w", err)
 	}
 	return "master" == output, nil
+}
+
+func isCurrentMain() (bool, error) {
+	output, err := git_hooks.Git("rev-parse", "--abbrev-ref", "HEAD")
+	if err != nil {
+		return false, fmt.Errorf("could not get current branch: %w", err)
+	}
+	return "main" == output, nil
 }
