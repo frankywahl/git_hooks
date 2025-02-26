@@ -34,7 +34,7 @@ func run() error {
 	for _, file := range files {
 		if file == "yarn.lock" {
 			fmt.Println("Running yarn…")
-			if err := git_hooks.Run("yarn", "install", "--pure-lockfile"); err != nil {
+			if err := git_hooks.Run("yarn", "install", "--pure-lockfile", "--ignore-scripts"); err != nil {
 				return fmt.Errorf("faild to run yarn")
 			}
 		}
