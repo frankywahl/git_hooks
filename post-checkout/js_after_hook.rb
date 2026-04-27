@@ -33,7 +33,7 @@ module PostCheckoutHandler
 
     def run_yarn
       puts "Running yarn..."
-      system("yarn install --pure-lockfile", out: $stdout, err: :out)
+      system("yarn install --pure-lockfile --ignore-scripts", out: $stdout, err: :out)
     end
 
     def npm_changed?
